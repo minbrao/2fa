@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tạo mã TOTP 2FA ngay trên thiết bị, không gửi secret lên máy chủ." />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+    <meta name="theme-color" content="#07111f" />
+    <title>Mã xác minh 2FA</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <main class="shell">
+      <section class="tool-card" aria-labelledby="page-title">
+        <header class="topbar">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M7 10V8a5 5 0 0 1 10 0v2" />
+              <rect x="4" y="10" width="16" height="11" rx="3" />
+              <path d="M12 14v3" />
+            </svg>
+          </div>
+          <div>
+            <p class="eyebrow">TOTP · CHẠY TRÊN THIẾT BỊ</p>
+            <h1 id="page-title">Mã xác minh 2FA</h1>
+          </div>
+          <div class="privacy-pill" title="Ứng dụng không tạo kết nối mạng">
+            <span></span>
+            Riêng tư
+          </div>
+        </header>
+
+        <div class="workspace">
+          <section class="input-panel" aria-labelledby="input-title">
+            <div class="section-heading">
+              <div>
+                <span class="step">01</span>
+                <h2 id="input-title">Nhập khóa bảo mật</h2>
+              </div>
+              <button id="clear-button" class="text-button" type="button">Xóa</button>
+            </div>
+
+            <label for="secret-input">2FA secret (Base32 hoặc otpauth://)</label>
+            <div class="secret-field">
+              <input
+                id="secret-input"
+                type="password"
+                inputmode="text"
+                placeholder="Ví dụ: JBSW Y3DP EHPK 3PXP"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-describedby="secret-help secret-error"
+              />
+              <button id="visibility-button" class="icon-button" type="button" aria-label="Hiện khóa bảo mật" aria-pressed="false">
+                <svg class="eye-open" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                  <circle cx="12" cy="12" r="2.6" />
+                </svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m3 3 18 18M10.6 6.1A9 9 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.3 6.3C3.9 8 2.5 12 2.5 12s3.5 6 9.5 6a9 9 0 0 0 3-.5" />
+                </svg>
+              </button>
+            </div>
+            <p id="secret-help" class="help-text">Khoảng trắng và dấu gạch ngang sẽ được tự động bỏ qua.</p>
+            <p id="secret-error" class="error-text" role="alert" aria-live="polite"></p>
+
+            <div class="privacy-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3 4.5 6v5.2c0 4.7 3.2 8.2 7.5 9.8 4.3-1.6 7.5-5.1 7.5-9.8V6L12 3Z" />
+                <path d="m8.8 12 2.1 2.1 4.5-4.5" />
+              </svg>
+              <p><strong>Khóa không rời khỏi trình duyệt.</strong> Trang này không có máy chủ xử lý và không lưu dữ liệu.</p>
+            </div>
+          </section>
+
+          <section class="code-panel" aria-labelledby="result-title">
+            <div class="section-heading">
+              <div>
+                <span class="step">02</span>
+                <h2 id="result-title">Mã hiện tại</h2>
+              </div>
+              <div class="status-dot" id="status-label">Đang chờ khóa</div>
+            </div>
+
+            <button id="code-button" class="code-display" type="button" disabled aria-label="Sao chép mã 2FA">
+              <span id="code-value">——— ———</span>
+            </button>
+
+            <div class="timer-row">
+              <div class="timer-copy">
+                <span>Còn lại</span>
+                <strong><span id="seconds-left">30</span> giây</strong>
+              </div>
+              <progress id="timer-progress" class="timer-progress" max="30" value="30" aria-label="Thời gian còn lại của mã"></progress>
+            </div>
+
+            <button id="copy-button" class="copy-button" type="button" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="8" y="8" width="11" height="11" rx="2" />
+                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+              </svg>
+              <span>Sao chép mã</span>
+            </button>
+            <p id="copy-status" class="copy-status" aria-live="polite"></p>
+          </section>
+        </div>
+      </section>
+
+      <footer>
+        <p>Đồng hồ trên thiết bị cần chính xác để mã hoạt động.</p>
+        <p>SHA-1 · 6 chữ số · chu kỳ 30 giây</p>
+      </footer>
+    </main>
+  </body>
+</html>
